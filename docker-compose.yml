@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  be_184865_db:
+    image: mariadb
+    container_name: be_184865_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: dlugierozdzkidb
+    restart: always
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-udlugierozdzki", "-ppassword" ]
+      interval: 10s
+      retries: 10
+    ports:
+      - 18485:3306
+  be_184865_prestashop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: be_184865_prestashop
+    depends_on:
+      be_184865_db:
+        condition: service_healthy
+    ports:
+      - 18487:80
+      - 18486:443
+    environment:
+      PS_INSTALL_AUTO: 0
+      PS_FOLDER_INSTALL: thrash
+      PS_ERASE_DB: 0
+      PS_FOLDER_ADMIN: amdin
+      DB_SERVER: be_184865_db
+      DB_USER: root
+      DB_PASSWD: root
+      DB_NAME: dlugierozdzkidb
+      PS_DEV_MODE: 0
+      PS_ADMIN_FOLDER: adminpanel
+      PS_DOMAIN: localhost:18487
+      PS_DOMAIN_SSL: localhost:18486
+    restart: always
